@@ -1,5 +1,6 @@
 
-//#include <NewPing.h>
+#include <NewPing.h>
+#include <NewTone.h>
 
 // Motors control pins
 const int left_positive = 6;
@@ -80,27 +81,27 @@ void stop_car () {
 }
 
 void play_warning () {
-  tone (buzzer, 1000);
+  NewTone (buzzer, 1000);
   delay (500);
-  noTone (buzzer);
+  noNewTone (buzzer);
   delay (500);
-  tone (buzzer, 1000);
+  NewTone (buzzer, 1000);
   delay (1500);
-  noTone (buzzer);
+  noNewTone (buzzer);
 }
 
 void play_stop() {
-  tone (buzzer, 4000);
+  NewTone (buzzer, 4000);
   delay (400);
-  noTone (buzzer);
+  noNewTone (buzzer);
   delay (400);
-  tone (buzzer, 4000);
+  NewTone (buzzer, 4000);
   delay (400);
-  tone (buzzer, 4000);
+  NewTone (buzzer, 4000);
   delay (400);
-  noTone (buzzer);
+  noNewTone (buzzer);
   delay (400);
-  tone (buzzer, 4000);
+  NewTone (buzzer, 4000);
   delay (400);
-  noTone (buzzer);
+  noNewTone (buzzer);
 }
