@@ -18,13 +18,14 @@ NewPing sonar(sonar_send, sonar_receive, max_distance);
 
 void play_jinglebells();
 void play_rampup (int times);
-void move_front();
-void move_back();
+void move_forward ();
+void move_backward();
 void turn_left();
 void turn_right();
 void rotate_right();
 void rotate_left();
 void stop_car();
+void self_drive();
 
 void setup() {
   // to be run just once
@@ -35,25 +36,17 @@ void setup() {
 }
 
 void loop() {
-  move_front();
-  delay(5000);
-  turn_left();
-  delay(1000);
-  move_front();
-  delay(5000);
-  move_back();
-  delay(5000);
-  stop_car();
+  self_drive();
 }
 
-void move_front () {
+void move_forward () {
   digitalWrite (left_positive, HIGH);
   digitalWrite (left_negative, LOW);
   digitalWrite (right_positive, HIGH);
   digitalWrite (right_negative, LOW);
 }
 
-void move_back() {
+void move_backward () {
   digitalWrite (left_positive, LOW);
   digitalWrite (left_negative, HIGH);
   digitalWrite (right_positive, LOW);
@@ -135,5 +128,28 @@ void play_rampup (int times)
       delay(1);
     }
     delay(500); // need to test this value 
+  }
+}
+
+
+void self_drive () {
+  move_forward();
+  float distance = sonar.ping_cm ( );
+  while ( distance == 0.0 )
+    distance = sonar.ping_cm ( ); // we want a valid measurement
+
+  if ( distance < 20.0 ) {
+    turn_right();
+    delay(50); // to be determined
+    float new_distance = sonar.ping_cm ( );
+    if ( new_distance <= distance )
+      turn_left();
+    
+    delay(200);
+  }
+
+  if ( distance < 5.0 ) {
+    stop_car();
+    play_jinglebells ();
   }
 }
