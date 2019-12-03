@@ -12,7 +12,7 @@ const int buzzer = 13;
 // Sonar control values
 #define sonar_send A1
 #define sonar_receive A0
-#define max_distance 200
+#define max_distance 800
 
 NewPing sonar(sonar_send, sonar_receive, max_distance);
 
@@ -102,10 +102,10 @@ void play_note ( char note, int duration ) {
 
 void play_jinglebells() {
 
-  int length = 26;
+  int  length = 26;
   char notes[] = "eeeeeeegcde fffffeeeeddedg";
   int  beats[] = { 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2};
-  int  tempo = 300;
+  int  tempo = 200;
   
   for (int i = 0; i < length; i++) {
     if (notes[i] == ' ') {
@@ -115,7 +115,7 @@ void play_jinglebells() {
     }
     
     // pause between notes
-    delay(tempo / 2); 
+    delay((tempo * 2) * beats[i]); 
   }
 }
 
@@ -138,18 +138,19 @@ void self_drive () {
   while ( distance == 0.0 )
     distance = sonar.ping_cm ( ); // we want a valid measurement
 
-  if ( distance < 20.0 ) {
+  if ( distance < 50.0 ) {
     turn_right();
-    delay(50); // to be determined
+    delay(300); // to be determined
     float new_distance = sonar.ping_cm ( );
     if ( new_distance <= distance )
       turn_left();
     
-    delay(200);
+    delay(300);
   }
 
   if ( distance < 5.0 ) {
     stop_car();
+    play_rampup(3);
     play_jinglebells ();
   }
 }
