@@ -89,8 +89,8 @@ void stop_car () {
 }
 
 void play_note ( char note, int duration ) {
-  char names[] = { 'c', 'd', 'e', 'f', 'g', 'a', 'b', 'C' };
-  int  tones[] = { 1915, 1700, 1519, 1432, 1275, 1136, 1014, 956 };
+  char names[] = { 'c', 'd', 'e', 'f', 'g' };
+  int  tones[] = { 2100, 1870, 1670, 1580, 1400 };
 
   // play the tone corresponding to the note name
   for (int i = 0; i < 8; i++) {
@@ -119,7 +119,6 @@ void play_jinglebells() {
   }
 }
 
-
 void play_rampup (int times)
 {
   for (int i = 0; i < times; i++) {
@@ -140,8 +139,10 @@ void self_drive () {
 
   if ( distance < 50.0 ) {
     turn_right();
-    delay(300); // to be determined
+    delay(500); // to be determined
     float new_distance = sonar.ping_cm ( );
+    while ( new_distance == 0.0 )
+      new_distance = sonar.ping_cm ( );
     if ( new_distance <= distance )
       turn_left();
     
