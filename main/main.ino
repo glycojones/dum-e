@@ -25,6 +25,7 @@ void turn_right();
 void rotate_right();
 void rotate_left();
 void stop_car();
+void try_to_unstuck();
 void self_drive();
 
 void setup() {
@@ -33,6 +34,7 @@ void setup() {
   pinMode (left_negative, OUTPUT);
   pinMode (right_positive, OUTPUT);
   pinMode (right_negative, OUTPUT);
+  pinMode (buzzer, OUTPUT);
 }
 
 void loop() {
@@ -90,12 +92,14 @@ void stop_car () {
 
 void play_note ( char note, int duration ) {
   char names[] = { 'c', 'd', 'e', 'f', 'g' };
-  int  tones[] = { 2100, 1870, 1670, 1580, 1400 };
+  int  tones[] = { 1047, 1175, 1319, 1397, 1568 };
 
   // play the tone corresponding to the note name
-  for (int i = 0; i < 8; i++) {
+  for (int i = 0; i < 5; i++) {
     if (names[i] == note) {
-      NewTone(buzzer, tones[i], duration);
+      NewTone(buzzer, tones[i]);
+      delay(duration);
+      noNewTone(buzzer);
     }
   }
 }
@@ -105,7 +109,7 @@ void play_jinglebells() {
   int  length = 26;
   char notes[] = "eeeeeeegcde fffffeeeeddedg";
   int  beats[] = { 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2};
-  int  tempo = 200;
+  int  tempo = 80;
   
   for (int i = 0; i < length; i++) {
     if (notes[i] == ' ') {
@@ -119,17 +123,31 @@ void play_jinglebells() {
   }
 }
 
-void play_rampup (int times)
+void play_rampup (int speed = 1)
 {
-  for (int i = 0; i < times; i++) {
-    for (unsigned long freq = 125; freq <= 15000; freq += 10) { 
-      NewTone(buzzer, freq); 
-      delay(1);
-    }
-    delay(500); // need to test this value 
+  if (speed < 1)
+    speed = 1;
+    
+  for (unsigned long freq = 80; freq <= 6000; freq += 10 * speed) { 
+    NewTone(buzzer, freq);
+    delay(1); 
   }
+  for (unsigned long freq = 4000; freq > 60; freq -= 15 * speed) { 
+    NewTone(buzzer, freq);
+    delay(1); 
+  }
+  noNewTone(buzzer);
 }
 
+void try_to_unstuck () {
+  stop_car();
+  play_rampup(3);
+  move_backward();
+  delay(300); // try different values
+  rotate_right();
+  delay(1000);
+  move_forward();
+}
 
 void self_drive () {
   move_forward();
@@ -139,19 +157,28 @@ void self_drive () {
 
   if ( distance < 50.0 ) {
     turn_right();
-    delay(500); // to be determined
+    delay(100); // to be determined
     float new_distance = sonar.ping_cm ( );
     while ( new_distance == 0.0 )
       new_distance = sonar.ping_cm ( );
     if ( new_distance <= distance )
       turn_left();
     
-    delay(300);
-  }
-
-  if ( distance < 5.0 ) {
-    stop_car();
-    play_rampup(3);
-    play_jinglebells ();
+    while ( new_distance < distance ) {
+      delay(10);
+      new_distance = sonar.ping_cm();   
+    
+      if ( new_distance < 10.0 ) {
+        try_to_unstuck();
+    
+        float final_distance = sonar.ping_cm ( );
+        if ( final_distance < 5.0 ) {
+          stop_car();
+          play_rampup(1);
+          play_jinglebells ();
+          while (1); // End here
+        }
+      }
+    }
   }
 }
