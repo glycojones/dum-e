@@ -25,6 +25,7 @@ void turn_right();
 void rotate_right();
 void rotate_left();
 void stop_car();
+float get_distance();
 void try_to_unstuck();
 void self_drive();
 
@@ -35,10 +36,6 @@ void setup() {
   pinMode (right_positive, OUTPUT);
   pinMode (right_negative, OUTPUT);
   pinMode (buzzer, OUTPUT);
-}
-
-void loop() {
-  self_drive();
 }
 
 void move_forward () {
@@ -88,6 +85,13 @@ void stop_car () {
   digitalWrite (left_negative, LOW);
   digitalWrite (right_positive, LOW);
   digitalWrite (right_negative, LOW);  
+}
+
+float get_distance() {
+  float distance = sonar.ping_cm ( );
+  while ( distance == 0.0 )
+    distance = sonar.ping_cm ( ); // we want a valid measurement
+  return distance;
 }
 
 void play_note ( char note, int duration ) {
@@ -151,27 +155,24 @@ void try_to_unstuck () {
 
 void self_drive () {
   move_forward();
-  float distance = sonar.ping_cm ( );
-  while ( distance == 0.0 )
-    distance = sonar.ping_cm ( ); // we want a valid measurement
+  float distance = get_distance();
 
   if ( distance < 50.0 ) {
     turn_right();
     delay(100); // to be determined
-    float new_distance = sonar.ping_cm ( );
-    while ( new_distance == 0.0 )
-      new_distance = sonar.ping_cm ( );
+    float new_distance = get_distance();
+    
     if ( new_distance <= distance )
       turn_left();
     
     while ( new_distance < distance ) {
       delay(10);
-      new_distance = sonar.ping_cm();   
+      new_distance = get_distance();   
     
       if ( new_distance < 10.0 ) {
         try_to_unstuck();
     
-        float final_distance = sonar.ping_cm ( );
+        float final_distance = get_distance();
         if ( final_distance < 5.0 ) {
           stop_car();
           play_rampup(1);
